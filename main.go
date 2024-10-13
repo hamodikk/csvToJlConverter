@@ -33,7 +33,7 @@ type House struct {
 	Households int     `json:"hh"`
 }
 
-// Helper function that makes sure the ehaders are in the csv file and correct
+// Helper function that makes sure the headers are in the csv file and correct
 func validateHeaders(headers []string) bool {
 	expectedHeaders := []string{
 		"value", "income", "age", "rooms", "bedrooms", "pop", "hh",

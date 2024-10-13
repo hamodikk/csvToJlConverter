@@ -104,3 +104,158 @@ Example Usage:
 ```bash
 .\csvtojl.exe .\housesInput.csv .\housesOutput.jl
 ```
+
+### Code Explanation
+
+1. Import dependencies. We need these libraries for the program to function correctly.
+```go
+import (
+	"encoding/csv"
+	"encoding/json"
+	"fmt"
+	"log"
+	"os"
+	"strconv"
+	"strings"
+)
+```
+2. Create the top-level structure for JSON output.
+    This is our houses object that contains individual house data.
+    ```go
+    type Response struct {
+	Houses []House `json:"houses"`
+    }
+    ```
+3. Create a function that will handle errors.
+```go
+func checkError(err error) {
+	if err != nil {
+		log.Fatalf("Error: %v", err)
+	}
+}
+```
+4. Create the struct that will hold individual house data.
+    Make sure the types are written correctly.
+    ```go
+    type House struct {
+	Value      int     `json:"value"`
+	Income     float64 `json:"income"`
+	Age        int     `json:"age"`
+	Rooms      int     `json:"rooms"`
+	Bedrooms   int     `json:"bedrooms"`
+	Population int     `json:"pop"`
+	Households int     `json:"hh"`
+    }
+    ```
+5. Create a function that checks the input file headers.
+```go
+func validateHeaders(headers []string) bool {
+	expectedHeaders := []string{
+		"value", "income", "age", "rooms", "bedrooms", "pop", "hh",
+	}
+	return strings.Join(headers, ",") == strings.Join(expectedHeaders, ",")
+}
+```
+6. Create the main function
+- Check for correct use of the command-line arguments.
+```go
+func main() {
+	if len(os.Args) < 3 {
+		log.Fatal("Usage: csvtojl <input.csv> <output.jl>")
+	}
+```
+- Assigning input and output arguments allow us to run the program from the command line with our input file.
+```go
+    inputFile := os.Args[1]
+    outputFile := os.Args[2]
+```
+- Open the input file and create the output file.
+```go
+    csvFile, err := os.Open(inputFile)
+    checkError(err)
+    defer csvFile.Close()
+
+    jsonFile, err := os.Create(outputFile)
+    checkError(err)
+    defer jsonFile.Close()
+```
+- Read the headers and check headers for correctness
+```go
+    // Init csv reader
+    reader := csv.NewReader(csvFile)
+
+    // Read the headers
+    header, err := reader.Read()
+    checkError(err)
+
+    // Check that the headers are correct
+    if !validateHeaders(header) {
+        log.Fatal("Unexpected CSV headers.")
+    }
+```
+- Read the data
+```go
+    records, err := reader.ReadAll()
+    checkError(err)
+```
+- Create the slice that will hold the houses data of House structs.
+```go
+    var houses []House
+```
+- Loop through the read data and type it, followed by extracting the data in a way that fits the House struct. Lastly, append the struct to the houses slice.
+```go
+    for _, line := range records {
+        // Convert data to their corresponding types
+        value, err := strconv.ParseFloat(line[0], 64)
+        checkError(err)
+
+        income, err := strconv.ParseFloat(line[1], 64)
+        checkError(err)
+
+        age, err := strconv.Atoi(line[2])
+        checkError(err)
+
+        rooms, err := strconv.Atoi(line[3])
+        checkError(err)
+
+        bedrooms, err := strconv.Atoi(line[4])
+        checkError(err)
+
+        population, err := strconv.Atoi(line[5])
+        checkError(err)
+
+        households, err := strconv.Atoi(line[6])
+        checkError(err)
+
+        // Extract the data in the form of the struct
+        house := House{
+            Value:      int(value),
+            Income:     income,
+            Age:        int(age),
+            Rooms:      int(rooms),
+            Bedrooms:   int(bedrooms),
+            Population: int(population),
+            Households: int(households),
+        }
+
+        // Append the struct to the slice
+        houses = append(houses, house)
+    }
+```
+- Create the top-level response object. In this case, we are assigning the houses slice to the Response struct.
+```go
+    response := Response{Houses: houses}
+```
+- Convert the response object to JSON and write it to the output file.
+```go
+    // Convert the response to JSON
+    jsonData, err := json.MarshalIndent(response, "", " ")
+    checkError(err)
+
+    // Write the JSON to the output file
+    _, err = jsonFile.WriteString(string(jsonData))
+    checkError(err)
+
+    fmt.Printf("File converted successfully! JSON lines in %s\n", outputFile)
+}
+```
