@@ -69,6 +69,7 @@ Running the program will return a file that looks like:
    "pop": 496,
    "hh": 177
   }
+ ]
 }
 ```
 
