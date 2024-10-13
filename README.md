@@ -29,7 +29,7 @@ The program works with a specific dataset structure. Example CSV file can be fou
 
 ### Example CSV data and JSON Lines file
 
-Here is an example data from the [housing data](housesInput.csv):
+Here is an example data from the [housing dataset](housesInput.csv):
 
 | Value  | Income | Age | Rooms | Bedrooms | Population | Households |
 |--------|--------|-----|-------|----------|------------|------------|
@@ -69,6 +69,7 @@ Running the program will return a file that looks like:
    "pop": 496,
    "hh": 177
   }
+}
 ```
 
 ## Features
