@@ -40,37 +40,10 @@ Here is an example data from the [housing dataset](housesInput.csv):
 Running the program will return a file that looks like:
 
 ```json
-{
- "houses": [
-  {
-   "value": 452600,
-   "income": 8.3252,
-   "age": 41,
-   "rooms": 880,
-   "bedrooms": 129,
-   "pop": 322,
-   "hh": 126
-  },
-  {
-   "value": 358500,
-   "income": 8.3014,
-   "age": 21,
-   "rooms": 7099,
-   "bedrooms": 1106,
-   "pop": 2401,
-   "hh": 1138
-  },
-  {
-   "value": 352100,
-   "income": 7.2574,
-   "age": 52,
-   "rooms": 1467,
-   "bedrooms": 190,
-   "pop": 496,
-   "hh": 177
-  }
- ]
-}
+{"value":452600,"income":8.3252,"age":41,"rooms":880,"bedrooms":129,"pop":322,"hh":126}
+{"value":358500,"income":8.3014,"age":21,"rooms":7099,"bedrooms":1106,"pop":2401,"hh":1138}
+{"value":352100,"income":7.2574,"age":52,"rooms":1467,"bedrooms":190,"pop":496,"hh":177}
+...
 ```
 
 ## Features
@@ -119,14 +92,7 @@ import (
 	"strings"
 )
 ```
-2. Create the top-level structure for JSON output.
-    This is our houses object that contains individual house data.
-    ```go
-    type Response struct {
-	Houses []House `json:"houses"`
-    }
-    ```
-3. Create a function that will handle errors.
+2. Create a function that will handle errors.
 ```go
 func checkError(err error) {
 	if err != nil {
@@ -134,7 +100,7 @@ func checkError(err error) {
 	}
 }
 ```
-4. Create the struct that will hold individual house data.
+3. Create the struct that will hold individual house data.
     Make sure the types are written correctly.
     ```go
     type House struct {
@@ -147,7 +113,7 @@ func checkError(err error) {
 	Households int     `json:"hh"`
     }
     ```
-5. Create a function that checks the input file headers.
+4. Create a function that checks the input file headers.
 ```go
 func validateHeaders(headers []string) bool {
 	expectedHeaders := []string{
@@ -156,7 +122,7 @@ func validateHeaders(headers []string) bool {
 	return strings.Join(headers, ",") == strings.Join(expectedHeaders, ",")
 }
 ```
-6. Create the main function
+5. Create the main function
 - Check for correct use of the command-line arguments.
 ```go
 func main() {
@@ -198,10 +164,6 @@ func main() {
     records, err := reader.ReadAll()
     checkError(err)
 ```
-- Create the slice that will hold the houses data of House structs.
-```go
-    var houses []House
-```
 - Loop through the read data and type it, followed by extracting the data in a way that fits the House struct. Lastly, append the struct to the houses slice.
 ```go
     for _, line := range records {
@@ -242,20 +204,14 @@ func main() {
         houses = append(houses, house)
     }
 ```
-- Create the top-level response object. In this case, we are assigning the houses slice to the Response struct.
-```go
-    response := Response{Houses: houses}
-```
 - Convert the response object to JSON and write it to the output file.
 ```go
-    // Convert the response to JSON
-    jsonData, err := json.MarshalIndent(response, "", " ")
-    checkError(err)
+		// Convert the House object to JSON
+		jsonData, err := json.Marshal(house)
+		checkError(err)
 
-    // Write the JSON to the output file
-    _, err = jsonFile.WriteString(string(jsonData))
-    checkError(err)
-
-    fmt.Printf("File converted successfully! JSON lines in %s\n", outputFile)
-}
+		// Write the JSON to the file, followed by a new line to create the jl format
+		fmt.Fprintln(jsonFile, string(jsonData))
+	}
+	fmt.Printf("File converted successfully! JSON lines in %s\n", outputFile)
 ```

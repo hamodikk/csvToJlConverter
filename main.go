@@ -10,11 +10,6 @@ import (
 	"strings"
 )
 
-// Create the top-level structure for JSON output
-type Response struct {
-	Houses []House `json:"houses"`
-}
-
 // Helper function that checks for errors, terminate the program if an error occurs
 func checkError(err error) {
 	if err != nil {
@@ -77,8 +72,6 @@ func main() {
 	records, err := reader.ReadAll()
 	checkError(err)
 
-	var houses []House
-
 	// Extract the data line by line and fit it on to the struct
 	for _, line := range records {
 		// Convert data to their corresponding types
@@ -114,20 +107,12 @@ func main() {
 			Households: int(households),
 		}
 
-		// Append the struct to the slice
-		houses = append(houses, house)
+		// Convert the House object to JSON
+		jsonData, err := json.Marshal(house)
+		checkError(err)
+
+		// Write the JSON to the file, followed by a new line to create the jl format
+		fmt.Fprintln(jsonFile, string(jsonData))
 	}
-
-	// Create the top-level response object
-	response := Response{Houses: houses}
-
-	// Convert the response to JSON
-	jsonData, err := json.MarshalIndent(response, "", " ")
-	checkError(err)
-
-	// Write the JSON to the output file
-	_, err = jsonFile.WriteString(string(jsonData))
-	checkError(err)
-
 	fmt.Printf("File converted successfully! JSON lines in %s\n", outputFile)
 }
